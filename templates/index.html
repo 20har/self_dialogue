@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Self Dialogue</title>
+    <style>
+        /* Ensure proper text alignment for RTL languages */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        Self Dialogue
+        <small style="font-size: 16px; color: gray;">by Zohar Cohen</small>
+    </h1>
+    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; width: 50%; height: 300px; overflow-y: scroll;">
+        <!-- Chat messages will appear here -->
+    </div>
+    <select id="sender" style="margin-top: 10px;">
+        <option value="*">Sender: *</option>
+        <option value="-">Sender: -</option>
+    </select>
+    <input type="text" id="user-input" placeholder="Type your message here..." style="width: 50%;" dir="ltr">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="downloadChat()">Save chat</button>
+    <input type="file" id="upload-file" onchange="uploadChat()" style="margin-top: 10px;">
+    <script>
+        let currentSender = "*";
+
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            if (!userInput) return;
+
+            const chatBox = document.getElementById("chat-box");
+            const selectedSender = document.getElementById("sender").value;
+
+            // Create a new message element
+            const messageElement = document.createElement("p");
+            messageElement.textContent = `${selectedSender} ${userInput}`;
+
+            // Check if the message is in Hebrew or Arabic (RTL languages)
+            const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(userInput); // Regex for Hebrew/Arabic
+            if (isRTL) {
+                messageElement.classList.add("rtl"); // Apply RTL class
+            }
+
+            // Add the message to the chat box
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+
+            document.getElementById("user-input").value = "";
+
+            // Send message to backend (optional, for saving to chat history)
+            await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput, sender: selectedSender })
+            });
+
+            // Toggle sender if no manual override
+            if (selectedSender === currentSender) {
+                currentSender = currentSender === "*" ? "-" : "*";
+                document.getElementById("sender").value = currentSender;
+            } else {
+                currentSender = selectedSender;
+            }
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Detect RTL in the input field
+        document.getElementById("user-input").addEventListener("input", function () {
+            const userInput = this.value;
+            const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(userInput); // Check for Hebrew or Arabic characters
+
+            if (isRTL) {
+                this.style.direction = "rtl"; // Set text direction to right-to-left
+                this.style.textAlign = "right"; // Align text to the right
+            } else {
+                this.style.direction = "ltr"; // Set text direction to left-to-right
+                this.style.textAlign = "left"; // Align text to the left
+            }
+        });
+
+        async function downloadChat() {
+            const response = await fetch("/save");
+            if (response.ok) {
+                const blob = await response.blob();
+                const link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "chat_history.txt";
+                link.click();
+            } else {
+                alert("Failed to save chat.");
+            }
+        }
+
+        async function uploadChat() {
+            const fileInput = document.getElementById("upload-file");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("No file selected.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("/load", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const chatHistory = await response.json();
+                const chatBox = document.getElementById("chat-box");
+                chatBox.innerHTML = "";
+                chatHistory.chat_history.forEach(item => {
+                    const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(item.message);
+                    const messageElement = document.createElement("p");
+                    messageElement.textContent = `${item.sender} ${item.message}`;
+
+                    if (isRTL) {
+                        messageElement.classList.add("rtl");
+                    }
+
+                    chatBox.appendChild(messageElement);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                alert("Failed to load chat.");
+            }
+        }
+    </script>
+</body>
+</html>
