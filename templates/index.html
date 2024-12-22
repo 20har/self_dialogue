@@ -21,11 +21,9 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            height: 100vh; /* Make the page take up the full viewport height */
             background-color: var(--background-color);
             color: var(--text-color);
-            height: 100vh;
         }
 
         h1 {
@@ -33,15 +31,19 @@
             margin: 10px 0;
         }
 
+        #chat-container {
+            flex: 1; /* Expand to take all available space */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent scrolling for the entire container */
+        }
+
         #chat-box {
+            flex: 1; /* Take up all available vertical space */
             border: 1px solid #ccc;
             padding: 10px;
-            width: 90%;
-            max-width: 600px;
-            height: 70%; /* Adjust height to make chat always visible */
-            overflow-y: auto; /* Smooth scrolling */
+            overflow-y: auto; /* Make only the chat box scrollable */
             background-color: var(--background-color);
-            margin-bottom: 10px;
         }
 
         .bubble {
@@ -71,9 +73,9 @@
         #input-container {
             display: flex;
             align-items: center;
-            width: 90%;
-            max-width: 600px;
-            margin-bottom: 10px;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background-color: var(--background-color);
         }
 
         #user-input {
@@ -94,9 +96,8 @@
 
         #actions-container {
             display: flex;
-            justify-content: space-between;
-            width: 90%;
-            max-width: 600px;
+            justify-content: space-around;
+            margin-top: 10px;
         }
 
         .action-button {
@@ -110,7 +111,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 5px;
             font-size: 1.2em;
         }
 
@@ -124,12 +124,14 @@
         Self Dialogue
         <small style="font-size: 16px; color: gray;">by Zohar Cohen</small>
     </h1>
-    <div id="chat-box">
-        <!-- Chat messages will appear here -->
-    </div>
-    <div id="input-container">
-        <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
-        <button id="send-button" onclick="sendMessage()">↩</button>
+    <div id="chat-container">
+        <div id="chat-box">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
+            <button id="send-button" onclick="sendMessage()">↩</button>
+        </div>
     </div>
     <div id="actions-container">
         <button class="action-button" onclick="downloadChat()">💾</button>
@@ -164,11 +166,11 @@
             messageElement.appendChild(messageText);
 
             chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; // Ensure the latest message is visible
+            chatBox.scrollTop = chatBox.scrollHeight; // Ensure latest message is visible
 
             document.getElementById("user-input").value = "";
 
-            // Toggle sender
+            // Toggle sender logic
             if (!manualSwitch) {
                 currentSender = currentSender === "*" ? "-" : "*";
             } else {
