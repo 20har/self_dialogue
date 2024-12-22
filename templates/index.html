@@ -2,10 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobile responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Self Dialogue</title>
     <style>
-        /* General styles for mobile responsiveness */
+        /* General Styles */
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --bubble-color-left: #e1ffc7;
+            --bubble-color-right: #dcf8c6;
+            --button-color: #007BFF;
+            --button-hover-color: #0056b3;
+        }
+
+        [data-theme="dark"] {
+            --background-color: #121212;
+            --text-color: #ffffff;
+            --bubble-color-left: #3e3e3e;
+            --bubble-color-right: #2c2c2c;
+            --button-color: #444444;
+            --button-hover-color: #666666;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -15,6 +33,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            height: 100vh;
         }
 
         h1 {
@@ -25,23 +46,42 @@
         #chat-box {
             border: 1px solid #ccc;
             padding: 10px;
-            width: 90%; /* Full width for mobile */
-            max-width: 600px; /* Limit for larger screens */
+            width: 90%;
+            max-width: 600px;
             height: 300px;
             overflow-y: scroll;
             margin-bottom: 15px;
+            background-color: var(--background-color);
+        }
+
+        .bubble {
+            max-width: 70%;
+            margin: 5px;
+            padding: 10px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .bubble-left {
+            background-color: var(--bubble-color-left);
+            align-self: flex-start;
+        }
+
+        .bubble-right {
+            background-color: var(--bubble-color-right);
+            align-self: flex-end;
         }
 
         #user-input, #sender, button, #upload-file {
-            width: 90%; /* Full width for mobile */
-            max-width: 600px; /* Limit for larger screens */
+            width: 90%;
+            max-width: 600px;
             margin-bottom: 10px;
             padding: 10px;
             font-size: 1em;
         }
 
         button {
-            background-color: #007BFF;
+            background-color: var(--button-color);
             color: white;
             border: none;
             border-radius: 5px;
@@ -50,12 +90,14 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover-color);
         }
 
-        .rtl {
-            direction: rtl;
-            text-align: right;
+        .theme-toggle {
+            margin: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            color: var(--button-color);
         }
     </style>
 </head>
@@ -75,9 +117,11 @@
     <button onclick="sendMessage()">Send</button>
     <button onclick="downloadChat()">Save chat</button>
     <input type="file" id="upload-file" onchange="uploadChat()">
+    <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
 
     <script>
         let currentSender = "*";
+        let manualOverride = false;
 
         async function sendMessage() {
             const userInput = document.getElementById("user-input").value;
@@ -87,14 +131,10 @@
             const selectedSender = document.getElementById("sender").value;
 
             // Create a new message element
-            const messageElement = document.createElement("p");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("bubble");
+            messageElement.classList.add(selectedSender === "*" ? "bubble-left" : "bubble-right");
             messageElement.textContent = `${selectedSender} ${userInput}`;
-
-            // Check if the message is in Hebrew or Arabic (RTL languages)
-            const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(userInput); // Regex for Hebrew/Arabic
-            if (isRTL) {
-                messageElement.classList.add("rtl"); // Apply RTL class
-            }
 
             // Add the message to the chat box
             chatBox.appendChild(messageElement);
@@ -102,20 +142,19 @@
 
             document.getElementById("user-input").value = "";
 
-            // Send message to backend (optional, for saving to chat history)
+            // Send message to backend (optional)
             await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userInput, sender: selectedSender })
             });
 
-            // Toggle sender if no manual override
-            if (selectedSender === currentSender) {
+            // Toggle sender
+            if (!manualOverride) {
                 currentSender = currentSender === "*" ? "-" : "*";
                 document.getElementById("sender").value = currentSender;
-            } else {
-                currentSender = selectedSender;
             }
+            manualOverride = false;
         }
 
         document.getElementById("user-input").addEventListener("keypress", function(event) {
@@ -125,68 +164,14 @@
             }
         });
 
-        // Detect RTL in the input field
-        document.getElementById("user-input").addEventListener("input", function () {
-            const userInput = this.value;
-            const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(userInput); // Check for Hebrew or Arabic characters
-
-            if (isRTL) {
-                this.style.direction = "rtl"; // Set text direction to right-to-left
-                this.style.textAlign = "right"; // Align text to the right
-            } else {
-                this.style.direction = "ltr"; // Set text direction to left-to-right
-                this.style.textAlign = "left"; // Align text to the left
-            }
+        document.getElementById("sender").addEventListener("change", function () {
+            manualOverride = true;
         });
 
-        async function downloadChat() {
-            const response = await fetch("/save");
-            if (response.ok) {
-                const blob = await response.blob();
-                const link = document.createElement("a");
-                link.href = window.URL.createObjectURL(blob);
-                link.download = "chat_history.txt";
-                link.click();
-            } else {
-                alert("Failed to save chat.");
-            }
-        }
-
-        async function uploadChat() {
-            const fileInput = document.getElementById("upload-file");
-            const file = fileInput.files[0];
-            if (!file) {
-                alert("No file selected.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const response = await fetch("/load", {
-                method: "POST",
-                body: formData
-            });
-
-            if (response.ok) {
-                const chatHistory = await response.json();
-                const chatBox = document.getElementById("chat-box");
-                chatBox.innerHTML = "";
-                chatHistory.chat_history.forEach(item => {
-                    const isRTL = /[\u0590-\u05FF\u0600-\u06FF]/.test(item.message);
-                    const messageElement = document.createElement("p");
-                    messageElement.textContent = `${item.sender} ${item.message}`;
-
-                    if (isRTL) {
-                        messageElement.classList.add("rtl");
-                    }
-
-                    chatBox.appendChild(messageElement);
-                });
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } else {
-                alert("Failed to load chat.");
-            }
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute("data-theme");
+            body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
         }
     </script>
 </body>
