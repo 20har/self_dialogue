@@ -9,19 +9,10 @@
         :root {
             --background-color: #ffffff;
             --text-color: #000000;
-            --bubble-color-left: #e1ffc7;
-            --bubble-color-right: #dcf8c6;
+            --bubble-color-left: #34c759; /* Green for * */
+            --bubble-color-right: #007aff; /* Blue for - */
             --button-color: #007BFF;
             --button-hover-color: #0056b3;
-        }
-
-        [data-theme="dark"] {
-            --background-color: #121212;
-            --text-color: #ffffff;
-            --bubble-color-left: #3e3e3e;
-            --bubble-color-right: #2c2c2c;
-            --button-color: #444444;
-            --button-hover-color: #666666;
         }
 
         body {
@@ -48,10 +39,10 @@
             padding: 10px;
             width: 90%;
             max-width: 600px;
-            height: 300px;
+            height: 60%; /* Take most of the screen height */
             overflow-y: scroll;
-            margin-bottom: 15px;
             background-color: var(--background-color);
+            margin-bottom: 10px;
         }
 
         .bubble {
@@ -64,19 +55,21 @@
 
         .bubble-left {
             background-color: var(--bubble-color-left);
+            color: white;
             align-self: flex-start;
         }
 
         .bubble-right {
             background-color: var(--bubble-color-right);
+            color: white;
             align-self: flex-end;
         }
 
         #user-input, #sender, button, #upload-file {
             width: 90%;
             max-width: 600px;
-            margin-bottom: 10px;
-            padding: 10px;
+            margin-bottom: 5px; /* Reduced spacing */
+            padding: 8px; /* Smaller padding */
             font-size: 1em;
         }
 
@@ -121,7 +114,7 @@
 
     <script>
         let currentSender = "*";
-        let manualOverride = false;
+        let manualSwitch = false;
 
         async function sendMessage() {
             const userInput = document.getElementById("user-input").value;
@@ -130,13 +123,12 @@
             const chatBox = document.getElementById("chat-box");
             const selectedSender = document.getElementById("sender").value;
 
-            // Create a new message element
+            // Create a new message bubble
             const messageElement = document.createElement("div");
             messageElement.classList.add("bubble");
             messageElement.classList.add(selectedSender === "*" ? "bubble-left" : "bubble-right");
-            messageElement.textContent = `${selectedSender} ${userInput}`;
+            messageElement.textContent = userInput;
 
-            // Add the message to the chat box
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
 
@@ -150,11 +142,12 @@
             });
 
             // Toggle sender
-            if (!manualOverride) {
+            if (!manualSwitch) {
                 currentSender = currentSender === "*" ? "-" : "*";
                 document.getElementById("sender").value = currentSender;
+            } else {
+                manualSwitch = false;
             }
-            manualOverride = false;
         }
 
         document.getElementById("user-input").addEventListener("keypress", function(event) {
@@ -165,7 +158,7 @@
         });
 
         document.getElementById("sender").addEventListener("change", function () {
-            manualOverride = true;
+            manualSwitch = true; // Manual override
         });
 
         function toggleTheme() {
