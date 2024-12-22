@@ -1,9 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobile responsiveness -->
     <title>Self Dialogue</title>
     <style>
-        /* Ensure proper text alignment for RTL languages */
+        /* General styles for mobile responsiveness */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 90%; /* Full width for mobile */
+            max-width: 600px; /* Limit for larger screens */
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 15px;
+        }
+
+        #user-input, #sender, button, #upload-file {
+            width: 90%; /* Full width for mobile */
+            max-width: 600px; /* Limit for larger screens */
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         .rtl {
             direction: rtl;
             text-align: right;
@@ -15,17 +64,18 @@
         Self Dialogue
         <small style="font-size: 16px; color: gray;">by Zohar Cohen</small>
     </h1>
-    <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; width: 50%; height: 300px; overflow-y: scroll;">
+    <div id="chat-box">
         <!-- Chat messages will appear here -->
     </div>
-    <select id="sender" style="margin-top: 10px;">
+    <select id="sender">
         <option value="*">Sender: *</option>
         <option value="-">Sender: -</option>
     </select>
-    <input type="text" id="user-input" placeholder="Type your message here..." style="width: 50%;" dir="ltr">
+    <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
     <button onclick="sendMessage()">Send</button>
     <button onclick="downloadChat()">Save chat</button>
-    <input type="file" id="upload-file" onchange="uploadChat()" style="margin-top: 10px;">
+    <input type="file" id="upload-file" onchange="uploadChat()">
+
     <script>
         let currentSender = "*";
 
