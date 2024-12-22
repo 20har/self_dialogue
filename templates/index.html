@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Self Dialogue</title>
     <style>
-        /* General Styles */
         :root {
             --background-color: #ffffff;
             --text-color: #000000;
@@ -13,15 +12,6 @@
             --bubble-color-right: #007aff; /* Blue for - */
             --button-color: #007BFF;
             --button-hover-color: #0056b3;
-        }
-
-        [data-theme="dark"] {
-            --background-color: #121212;
-            --text-color: #ffffff;
-            --bubble-color-left: #3e3e3e; /* Dark green */
-            --bubble-color-right: #2c2c2c; /* Dark blue */
-            --button-color: #444444;
-            --button-hover-color: #666666;
         }
 
         body {
@@ -48,9 +38,10 @@
             padding: 10px;
             width: 90%;
             max-width: 600px;
-            height: 70%; /* Larger chat area */
-            overflow-y: scroll;
+            height: 70%; /* Adjust height to make chat always visible */
+            overflow-y: auto; /* Smooth scrolling */
             background-color: var(--background-color);
+            margin-bottom: 10px;
         }
 
         .bubble {
@@ -77,40 +68,54 @@
             font-weight: bold;
         }
 
-        #controls {
+        #input-container {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            width: 100%;
+            width: 90%;
             max-width: 600px;
+            margin-bottom: 10px;
         }
 
         #user-input {
-            width: 100%;
+            flex: 1;
             padding: 8px;
             font-size: 1em;
-            margin-bottom: 5px;
         }
 
-        button {
+        #send-button {
             background-color: var(--button-color);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            padding: 8px 10px;
-            margin: 5px;
+            padding: 10px;
+            margin-left: 5px;
         }
 
-        button:hover {
-            background-color: var(--button-hover-color);
+        #actions-container {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 600px;
         }
 
-        .theme-toggle {
+        .action-button {
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 5px;
-            color: var(--button-color);
+            font-size: 1.2em;
+        }
+
+        .action-button:hover {
+            background-color: var(--button-hover-color);
         }
     </style>
 </head>
@@ -122,16 +127,15 @@
     <div id="chat-box">
         <!-- Chat messages will appear here -->
     </div>
-    <div id="controls">
-        <select id="sender">
-            <option value="*">Sender: *</option>
-            <option value="-">Sender: -</option>
-        </select>
+    <div id="input-container">
         <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
-        <button onclick="sendMessage()">Send</button>
-        <button onclick="downloadChat()">Save chat</button>
-        <input type="file" id="upload-file" onchange="uploadChat()">
-        <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+        <button id="send-button" onclick="sendMessage()">↩</button>
+    </div>
+    <div id="actions-container">
+        <button class="action-button" onclick="downloadChat()">💾</button>
+        <button class="action-button" onclick="uploadChat()">📂</button>
+        <button class="action-button" onclick="toggleTheme()">🌙</button>
+        <button class="action-button" onclick="showHelp()">❓</button>
     </div>
 
     <script>
@@ -143,7 +147,7 @@
             if (!userInput) return;
 
             const chatBox = document.getElementById("chat-box");
-            const selectedSender = document.getElementById("sender").value;
+            const selectedSender = currentSender;
 
             // Create a new message bubble
             const messageElement = document.createElement("div");
@@ -160,14 +164,13 @@
             messageElement.appendChild(messageText);
 
             chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+            chatBox.scrollTop = chatBox.scrollHeight; // Ensure the latest message is visible
 
             document.getElementById("user-input").value = "";
 
-            // Toggle sender logic
+            // Toggle sender
             if (!manualSwitch) {
                 currentSender = currentSender === "*" ? "-" : "*";
-                document.getElementById("sender").value = currentSender;
             } else {
                 manualSwitch = false;
             }
@@ -180,21 +183,14 @@
             });
         }
 
-        document.getElementById("user-input").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-
-        document.getElementById("sender").addEventListener("change", function () {
-            manualSwitch = true; // Manual override
-        });
-
         function toggleTheme() {
             const body = document.body;
             const currentTheme = body.getAttribute("data-theme") || "light";
             body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+        }
+
+        function showHelp() {
+            alert("This is a self-dialogue tool where you can engage in meaningful conversation with yourself!");
         }
     </script>
 </body>
