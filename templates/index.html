@@ -21,7 +21,7 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Make the page take up the full viewport height */
+            height: 100vh; /* Full viewport height */
             background-color: var(--background-color);
             color: var(--text-color);
         }
@@ -32,17 +32,17 @@
         }
 
         #chat-container {
-            flex: 1; /* Expand to take all available space */
+            flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Prevent scrolling for the entire container */
+            overflow: hidden;
         }
 
         #chat-box {
-            flex: 1; /* Take up all available vertical space */
+            flex: 1;
             border: 1px solid #ccc;
             padding: 10px;
-            overflow-y: auto; /* Make only the chat box scrollable */
+            overflow-y: auto;
             background-color: var(--background-color);
         }
 
@@ -82,6 +82,8 @@
             flex: 1;
             padding: 8px;
             font-size: 1em;
+            height: 2em;
+            resize: none;
         }
 
         #send-button {
@@ -129,7 +131,7 @@
             <!-- Chat messages will appear here -->
         </div>
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
+            <textarea id="user-input" placeholder="Type your message here..." dir="ltr"></textarea>
             <button id="send-button" onclick="sendMessage()">↩</button>
         </div>
     </div>
@@ -145,18 +147,16 @@
         let manualSwitch = false;
 
         async function sendMessage() {
-            const userInput = document.getElementById("user-input").value;
+            const userInput = document.getElementById("user-input").value.trim();
             if (!userInput) return;
 
             const chatBox = document.getElementById("chat-box");
             const selectedSender = currentSender;
 
-            // Create a new message bubble
             const messageElement = document.createElement("div");
             messageElement.classList.add("bubble");
             messageElement.classList.add(selectedSender === "*" ? "bubble-left" : "bubble-right");
 
-            // Add sender symbol and message
             const senderSymbol = document.createElement("span");
             senderSymbol.textContent = selectedSender + " ";
             senderSymbol.classList.add("sender-symbol");
@@ -166,18 +166,16 @@
             messageElement.appendChild(messageText);
 
             chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; // Ensure latest message is visible
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             document.getElementById("user-input").value = "";
 
-            // Toggle sender logic
             if (!manualSwitch) {
                 currentSender = currentSender === "*" ? "-" : "*";
             } else {
                 manualSwitch = false;
             }
 
-            // Send to backend (optional)
             await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -185,10 +183,25 @@
             });
         }
 
+        document.getElementById("user-input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
         function toggleTheme() {
             const body = document.body;
             const currentTheme = body.getAttribute("data-theme") || "light";
             body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+        }
+
+        function downloadChat() {
+            alert("Save functionality not yet implemented!");
+        }
+
+        function uploadChat() {
+            alert("Load functionality not yet implemented!");
         }
 
         function showHelp() {
