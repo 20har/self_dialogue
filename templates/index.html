@@ -65,12 +65,13 @@
             align-self: flex-end;
         }
 
-        #user-input, #sender, button, #upload-file {
+        #user-input {
             width: 90%;
             max-width: 600px;
-            margin-bottom: 5px; /* Reduced spacing */
-            padding: 8px; /* Smaller padding */
+            height: 60px;
+            padding: 8px;
             font-size: 1em;
+            resize: none; /* Disable resizing */
         }
 
         button {
@@ -80,6 +81,7 @@
             border-radius: 5px;
             cursor: pointer;
             padding: 10px;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -106,10 +108,8 @@
         <option value="*">Sender: *</option>
         <option value="-">Sender: -</option>
     </select>
-    <input type="text" id="user-input" placeholder="Type your message here..." dir="ltr">
+    <textarea id="user-input" placeholder="Type your message here..." dir="ltr"></textarea>
     <button onclick="sendMessage()">Send</button>
-    <button onclick="downloadChat()">Save chat</button>
-    <input type="file" id="upload-file" onchange="uploadChat()">
     <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
 
     <script>
@@ -117,7 +117,7 @@
         let manualSwitch = false;
 
         async function sendMessage() {
-            const userInput = document.getElementById("user-input").value;
+            const userInput = document.getElementById("user-input").value.trim();
             if (!userInput) return;
 
             const chatBox = document.getElementById("chat-box");
@@ -150,10 +150,21 @@
             }
         }
 
-        document.getElementById("user-input").addEventListener("keypress", function(event) {
+        document.getElementById("user-input").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
+                if (event.shiftKey) {
+                    // Add a new line if Shift+Enter is pressed
+                    const cursorPos = this.selectionStart;
+                    this.value =
+                        this.value.substring(0, cursorPos) +
+                        "\n" +
+                        this.value.substring(cursorPos);
+                    this.selectionStart = this.selectionEnd = cursorPos + 1;
+                } else {
+                    // Send the message if only Enter is pressed
+                    event.preventDefault();
+                    sendMessage();
+                }
             }
         });
 
