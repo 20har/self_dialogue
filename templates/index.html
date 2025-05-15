@@ -1,190 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self Dialogue</title>
-    <style>
-        /* General Styles */
-        :root {
-            --background-color: #ffffff;
-            --text-color: #000000;
-            --bubble-color-left: #34c759; /* Green for * */
-            --bubble-color-right: #007aff; /* Blue for - */
-            --button-color: #007BFF;
-            --button-hover-color: #0056b3;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Self Dialogue</title>
+  <style>
+    :root {
+      --background-color: #ffffff;
+      --text-color: #000000;
+      --bubble-color-left: #34c759;
+      --bubble-color-right: #007aff;
+      --button-color: #007BFF;
+      --button-hover-color: #0056b3;
+    }
 
-        body {
-            font-family: Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            height: 100vh;
-        }
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      height: 100vh;
+    }
 
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-        }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+    }
 
-        #chat-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            width: 90%;
-            max-width: 600px;
-            height: 60%; /* Take most of the screen height */
-            overflow-y: scroll;
-            background-color: var(--background-color);
-            margin-bottom: 10px;
-        }
+    #chat-box {
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 90%;
+      max-width: 600px;
+      height: 60%;
+      overflow-y: scroll;
+      background-color: var(--background-color);
+      margin-bottom: 10px;
+    }
 
-        .bubble {
-            max-width: 70%;
-            margin: 5px;
-            padding: 10px;
-            border-radius: 15px;
-            word-wrap: break-word;
-            white-space: pre-wrap; /* Preserve new lines */
-        }
+    .bubble {
+      max-width: 70%;
+      margin: 5px;
+      padding: 10px;
+      border-radius: 15px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
 
-        .bubble-left {
-            background-color: var(--bubble-color-left);
-            color: white;
-            align-self: flex-start;
-        }
+    .bubble-left {
+      background-color: var(--bubble-color-left);
+      color: white;
+      align-self: flex-start;
+    }
 
-        .bubble-right {
-            background-color: var(--bubble-color-right);
-            color: white;
-            align-self: flex-end;
-        }
+    .bubble-right {
+      background-color: var(--bubble-color-right);
+      color: white;
+      align-self: flex-end;
+    }
 
-        #user-input {
-            width: 90%;
-            max-width: 600px;
-            height: 60px;
-            padding: 8px;
-            font-size: 1em;
-            resize: none; /* Disable resizing */
-            font-family: Helvetica, Arial, sans-serif;
-        }
+    #user-input {
+      width: 90%;
+      max-width: 600px;
+      height: 60px;
+      padding: 8px;
+      font-size: 1em;
+      resize: none;
+      font-family: Helvetica, Arial, sans-serif;
+    }
 
-        button {
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            padding: 10px;
-            margin-top: 10px;
-            font-family: Helvetica, Arial, sans-serif;
-        }
+    button {
+      background-color: var(--button-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: Helvetica, Arial, sans-serif;
+    }
 
-        button:hover {
-            background-color: var(--button-hover-color);
-        }
+    button:hover {
+      background-color: var(--button-hover-color);
+    }
 
-        .theme-toggle {
-            margin: 10px;
-            cursor: pointer;
-            font-size: 1em;
-            color: var(--button-color);
-            font-family: Helvetica, Arial, sans-serif;
-        }
-    </style>
+    .theme-toggle {
+      margin: 10px;
+      cursor: pointer;
+      font-size: 1em;
+      color: var(--button-color);
+      font-family: Helvetica, Arial, sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <h1>
-        Self Dialogue
-        <small style="font-size: 16px; color: gray;">by Zohar Cohen</small>
-    </h1>
-    <div id="chat-box">
-        <!-- Chat messages will appear here -->
-    </div>
-    <select id="sender">
-        <option value="*">Sender: *</option>
-        <option value="-">Sender: -</option>
-    </select>
-    <textarea id="user-input" placeholder="Type your message here..." dir="ltr"></textarea>
-    <button onclick="sendMessage()">Send</button>
-    <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
+  <h1>
+    Self Dialogue
+    <small style="font-size: 16px; color: gray;">by Zohar Cohen</small>
+  </h1>
 
-    <script>
-        let currentSender = "*";
-        let manualSwitch = false;
+  <div id="chat-box"></div>
 
-        async function sendMessage() {
-            const userInput = document.getElementById("user-input").value.trim();
-            if (!userInput) return;
+  <select id="sender">
+    <option value="*">Sender: *</option>
+    <option value="-">Sender: -</option>
+  </select>
 
-            const chatBox = document.getElementById("chat-box");
-            const selectedSender = document.getElementById("sender").value;
+  <textarea id="user-input" placeholder="Type your message here..." dir="ltr"></textarea>
+  <button onclick="sendMessage()">Send</button>
+  <button onclick="showInstructionMessage()">❓</button>
+  <div class="theme-toggle" onclick="toggleTheme()">Toggle Theme</div>
 
-            // Create a new message bubble
-            const messageElement = document.createElement("div");
-            messageElement.classList.add("bubble");
-            messageElement.classList.add(selectedSender === "*" ? "bubble-left" : "bubble-right");
+  <script>
+    let currentSender = "*";
+    let manualSwitch = false;
 
-            // Preserve new lines in the message
-            const messageText = document.createTextNode(userInput);
-            messageElement.appendChild(messageText);
+    window.onload = () => {
+      showInstructionMessage();
+    };
 
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+    function showInstructionMessage() {
+      const chatBox = document.getElementById("chat-box");
 
-            document.getElementById("user-input").value = "";
+      const instruction = document.createElement("div");
+      instruction.classList.add("bubble", "bubble-left");
+      instruction.style.backgroundColor = "#f1f1f1";
+      instruction.style.color = "#000";
+      instruction.style.fontStyle = "italic";
+      instruction.textContent = 
+`🧭 Welcome to Self Dialogue.
 
-            // Send message to backend (optional)
-            await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput, sender: selectedSender })
-            });
+This space is for meaningful, self-reflective conversations with yourself.
 
-            // Toggle sender
-            if (!manualSwitch) {
-                currentSender = currentSender === "*" ? "-" : "*";
-                document.getElementById("sender").value = currentSender;
-            } else {
-                manualSwitch = false;
-            }
+• Use "*" and "-" to represent two inner voices or perspectives.
+• Write naturally and switch roles as you feel.
+• Press Enter to send a message.
+• Press Shift+Enter to add a new line.
+• Click ❓ any time to revisit this guide.
+
+Be honest. Be kind. Take your time.`;
+
+      chatBox.appendChild(instruction);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const userInput = document.getElementById("user-input").value.trim();
+      if (!userInput) return;
+
+      const chatBox = document.getElementById("chat-box");
+      const selectedSender = document.getElementById("sender").value;
+
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("bubble");
+      messageElement.classList.add(selectedSender === "*" ? "bubble-left" : "bubble-right");
+
+      const messageText = document.createTextNode(userInput);
+      messageElement.appendChild(messageText);
+
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      document.getElementById("user-input").value = "";
+
+      await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput, sender: selectedSender })
+      });
+
+      if (!manualSwitch) {
+        currentSender = currentSender === "*" ? "-" : "*";
+        document.getElementById("sender").value = currentSender;
+      } else {
+        manualSwitch = false;
+      }
+    }
+
+    document.getElementById("user-input").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        if (event.shiftKey) {
+          event.preventDefault();
+          const cursorPos = this.selectionStart;
+          this.value = this.value.substring(0, cursorPos) + "\n" + this.value.substring(cursorPos);
+          this.selectionStart = this.selectionEnd = cursorPos + 1;
+        } else {
+          event.preventDefault();
+          sendMessage();
         }
+      }
+    });
 
-        document.getElementById("user-input").addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                if (event.shiftKey) {
-                    // Add a new line if Shift+Enter is pressed
-                    const cursorPos = this.selectionStart;
-                    this.value =
-                        this.value.substring(0, cursorPos) +
-                        "\n" +
-                        this.value.substring(cursorPos);
-                    this.selectionStart = this.selectionEnd = cursorPos + 1;
-                } else {
-                    // Send the message if only Enter is pressed
-                    event.preventDefault();
-                    sendMessage();
-                }
-            }
-        });
+    document.getElementById("sender").addEventListener("change", function () {
+      manualSwitch = true;
+    });
 
-        document.getElementById("sender").addEventListener("change", function () {
-            manualSwitch = true; // Manual override
-        });
-
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute("data-theme");
-            body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
-        }
-    </script>
+    function toggleTheme() {
+      const body = document.body;
+      const currentTheme = body.getAttribute("data-theme");
+      body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+    }
+  </script>
 </body>
 </html>
-  
