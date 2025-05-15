@@ -65,6 +65,13 @@
       align-self: flex-end;
     }
 
+    .bubble-red {
+      background-color: #ff4d4f;
+      color: white;
+      font-weight: bold;
+      align-self: flex-start;
+    }
+
     #user-input {
       width: 90%;
       max-width: 600px;
@@ -97,6 +104,14 @@
       color: var(--button-color);
       font-family: Helvetica, Arial, sans-serif;
     }
+
+    #start-buttons {
+      margin-top: 10px;
+    }
+
+    #start-buttons button {
+      margin: 0 5px;
+    }
   </style>
 </head>
 <body>
@@ -106,6 +121,12 @@
   </h1>
 
   <div id="chat-box"></div>
+
+  <div id="start-buttons">
+    <p style="text-align:center">Would you like to start the journey?</p>
+    <button onclick="startJourney()">Yes</button>
+    <button onclick="declineJourney()">No</button>
+  </div>
 
   <select id="sender">
     <option value="*">Sender: *</option>
@@ -148,6 +169,39 @@ Be honest. Be kind. Take your time.`;
 
       chatBox.appendChild(instruction);
       chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function startJourney() {
+      document.getElementById("start-buttons").style.display = "none";
+
+      const chatBox = document.getElementById("chat-box");
+      const welcome = document.createElement("div");
+      welcome.classList.add("bubble", "bubble-red");
+      welcome.textContent = 
+`* So what's going on?
+What would you like to improve in your life?`;
+
+      chatBox.appendChild(welcome);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function declineJourney() {
+      document.getElementById("start-buttons").style.display = "none";
+
+      const chatBox = document.getElementById("chat-box");
+      const declineMsg = document.createElement("div");
+      declineMsg.classList.add("bubble", "bubble-left");
+      declineMsg.style.backgroundColor = "#ccc";
+      declineMsg.style.color = "#333";
+      declineMsg.style.fontStyle = "italic";
+      declineMsg.textContent = "No worries. Come back when you're ready.";
+
+      chatBox.appendChild(declineMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Disable input
+      document.getElementById("user-input").disabled = true;
+      document.querySelector("button[onclick='sendMessage()']").disabled = true;
     }
 
     async function sendMessage() {
