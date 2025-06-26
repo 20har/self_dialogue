@@ -122,6 +122,7 @@
         <button onclick="document.getElementById('upload-file').click()">📁</button>
         <button onclick="toggleTheme()">🌓</button>
         <button onclick="showIntroMessage()">❓</button>
+        <button onclick="askGPT()">🧠</button>
         <input type="file" id="upload-file" style="display:none" onchange="uploadChat()">
     </div>
 
@@ -206,7 +207,14 @@ The world is built by several plains: the physical, emotional and spiritual. We 
 “*” is the higher conscious voice, “-” is the emotional voice. This dialogue allows us to tell ourselves what we need to hear.`);
         }
 
-        // Initial intro message
+        async function askGPT() {
+            const response = await fetch("/guide");
+            const data = await response.json();
+            if (data && data.reply) {
+                showMessage("*", data.reply);
+            }
+        }
+
         window.onload = () => {
             setTimeout(() => {
                 if (document.getElementById("chat-box").childNodes.length === 0) showIntroMessage();
