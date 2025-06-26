@@ -1,19 +1,20 @@
 from flask import Flask, render_template, request, jsonify, send_file
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import os
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
-
 chat_history = []  # Temporary in-memory storage
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -25,7 +26,7 @@ def chat():
     if sender == "-":  # Respond only when emotional voice speaks
         prompt = create_prompt(chat_history)
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=prompt,
                 max_tokens=100,
@@ -37,7 +38,8 @@ def chat():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    return jsonify({"response": ""})  # No response from GPT when * speaks
+    return jsonify({"response": ""})  # No GPT response when * speaks
+
 
 def create_prompt(history):
     messages = [{
@@ -54,6 +56,7 @@ def create_prompt(history):
         messages.append({"role": role, "content": entry["message"]})
     return messages
 
+
 @app.route("/save", methods=["GET"])
 def save_chat():
     global chat_history
@@ -62,6 +65,7 @@ def save_chat():
         for entry in chat_history:
             f.write(f"{entry['sender']} {entry['message']}\n")
     return send_file(file_path, as_attachment=True)
+
 
 @app.route("/load", methods=["POST"])
 def load_chat():
@@ -82,6 +86,23 @@ def load_chat():
             chat_history.append({"sender": sender, "message": message})
     return jsonify({"status": "success", "chat_history": chat_history})
 
+
+@app.route("/guide")
+def guide():
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a gentle and helpful coach."},
+                {"role": "user", "content": "Please provide a guiding message to help someone stuck in their self-dialogue."}
+            ]
+        )
+        reply = response.choices[0].message.content.strip()
+        return jsonify({"reply": reply})
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(debug=True, use_reloader=True)

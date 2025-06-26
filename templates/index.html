@@ -10,6 +10,7 @@
             --text-color: #000000;
             --bubble-color-left: #34c759;
             --bubble-color-right: #007aff;
+            --bubble-color-gpt: #9b59b6;
             --toolbar-color: #f1f1f1;
             --button-color: #007BFF;
         }
@@ -60,6 +61,12 @@
             align-self: flex-end;
         }
 
+        .bubble-gpt {
+            background-color: var(--bubble-color-gpt);
+            color: white;
+            align-self: center;
+        }
+
         #input-area {
             display: flex;
             padding: 10px;
@@ -101,7 +108,6 @@
             font-size: 1.2em;
             cursor: pointer;
         }
-
     </style>
 </head>
 <body>
@@ -130,9 +136,13 @@
         let currentSender = "*";
         let manualSwitch = false;
 
-        function showMessage(sender, message) {
+        function showMessage(sender, message, isGPT = false) {
             const messageElement = document.createElement("div");
-            messageElement.classList.add("bubble", sender === "*" ? "bubble-left" : "bubble-right");
+            if (isGPT) {
+                messageElement.classList.add("bubble", "bubble-gpt");
+            } else {
+                messageElement.classList.add("bubble", sender === "*" ? "bubble-left" : "bubble-right");
+            }
             messageElement.textContent = message;
             document.getElementById("chat-box").appendChild(messageElement);
             document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
@@ -141,8 +151,15 @@
         async function sendMessage() {
             const userInput = document.getElementById("user-input").value.trim();
             if (!userInput) return;
-            const selectedSender = document.getElementById("sender").value;
 
+            if (userInput.startsWith("guide:")) {
+                showMessage("guide", userInput, true);
+                await askGPT(userInput);
+                document.getElementById("user-input").value = "";
+                return;
+            }
+
+            const selectedSender = document.getElementById("sender").value;
             showMessage(selectedSender, userInput);
             document.getElementById("user-input").value = "";
 
@@ -201,17 +218,14 @@
         }
 
         function showIntroMessage() {
-            showMessage("*", `Inner Dialogue is a method developed to raise conscious and awareness.
-Based on Buddhist and new age philosophies, modern CBT therapy and metaphysics.
-The world is built by several plains: the physical, emotional and spiritual. We believe it is possible to influence reality by inner work.
-“*” is the higher conscious voice, “-” is the emotional voice. This dialogue allows us to tell ourselves what we need to hear.`);
+            showMessage("*", `Inner Dialogue is a method developed to raise conscious and awareness.\nBased on Buddhist and new age philosophies, modern CBT therapy and metaphysics.\nThe world is built by several plains: the physical, emotional and spiritual. We believe it is possible to influence reality by inner work.\n“*” is the higher conscious voice, “-” is the emotional voice. This dialogue allows us to tell ourselves what we need to hear.`);
         }
 
-        async function askGPT() {
-            const response = await fetch("/guide");
+        async function askGPT(userMessage = "guide:") {
+            const response = await fetch("/guide?msg=" + encodeURIComponent(userMessage));
             const data = await response.json();
             if (data && data.reply) {
-                showMessage("*", data.reply);
+                showMessage("guide", data.reply, true);
             }
         }
 
